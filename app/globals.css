@@ -146,3 +146,15 @@
     scrollbar-width: none;
   }
 }
+
+/* Custom scanner cursor — only when JS has mounted and device is hover-capable */
+html.cursor-hidden,
+html.cursor-hidden body,
+html.cursor-hidden * {
+  cursor: none !important;
+}
+
+.cursor-frame[data-hover="true"] .cursor-corner {
+  border-color: var(--acid);
+  box-shadow: 0 0 8px rgba(212, 255, 59, 0.55);
+}
