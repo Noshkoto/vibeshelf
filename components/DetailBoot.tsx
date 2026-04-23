@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { deleteUserApp, getAppBySlug, isUserApp, makerKey } from "@/lib/storage";
+import { deleteUserApp, isUserApp, makerKey } from "@/lib/storage";
 import { categoryLabel, toolLabel } from "@/lib/tools";
 import type { AppEntry } from "@/lib/types";
 import { ArrowGlyph, LinkButton } from "./Button";
@@ -11,46 +11,21 @@ import CoverArt from "./CoverArt";
 import ToolBadge from "./ToolBadge";
 import UpvoteButton from "./UpvoteButton";
 
-export default function DetailBoot({ slug }: { slug: string }) {
+export default function DetailBoot({ slug, initialApp }: { slug: string; initialApp: AppEntry }) {
   const router = useRouter();
-  const [app, setApp] = useState<AppEntry | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const app = initialApp;
   const [owned, setOwned] = useState<boolean>(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
-    (async () => {
-      const [entry, owns] = await Promise.all([getAppBySlug(slug), isUserApp(slug)]);
-      if (!active) return;
-      setApp(entry ?? null);
-      setOwned(owns);
-      setLoaded(true);
-    })();
+    isUserApp(slug).then((owns) => {
+      if (active) setOwned(owns);
+    });
     return () => {
       active = false;
     };
   }, [slug]);
-
-  if (!loaded) {
-    return (
-      <div className="container-page py-24">
-        <div className="mx-auto h-6 w-32 animate-pulse rounded-full bg-paper/10" />
-      </div>
-    );
-  }
-
-  if (app === null) {
-    return (
-      <div className="container-page py-24 text-center">
-        <div className="eyebrow mb-3">404</div>
-        <h1 className="display mb-6 text-[64px]">Not on the shelf.</h1>
-        <LinkButton href="/" variant="paper" trailing={<ArrowGlyph />}>
-          Back to the gallery
-        </LinkButton>
-      </div>
-    );
-  }
 
   const mKey = makerKey(app);
 

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { SEED_APPS } from "./seed";
 import type { AppEntry, CategoryId, CoverPalette, ToolId } from "./types";
@@ -55,7 +56,7 @@ export function makerKey(app: AppEntry): string {
   return raw.replace(/^@/, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-export async function fetchAllApps(): Promise<AppEntry[]> {
+export const fetchAllApps = cache(async (): Promise<AppEntry[]> => {
   const supa = getServerClient();
   if (!supa) return SEED_APPS;
 
@@ -75,7 +76,7 @@ export async function fetchAllApps(): Promise<AppEntry[]> {
     upvotes: s.upvotes + (counts.get(s.slug) ?? 0),
   }));
   return [...user, ...seeds];
-}
+});
 
 export async function fetchAppBySlug(slug: string): Promise<AppEntry | undefined> {
   const all = await fetchAllApps();

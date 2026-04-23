@@ -1,30 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { getAppsByMaker, getMakerDisplay } from "@/lib/storage";
+import { useMemo } from "react";
 import type { AppEntry } from "@/lib/types";
 import AppCard from "./AppCard";
-import { ArrowGlyph, LinkButton } from "./Button";
 
-export default function MakerBoot({ handle }: { handle: string }) {
-  const [apps, setApps] = useState<AppEntry[]>([]);
-  const [display, setDisplay] = useState<{ name: string; handle?: string } | null>(null);
-  const [loaded, setLoaded] = useState(false);
+interface MakerDisplay {
+  name: string;
+  handle?: string;
+}
 
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      const [list, disp] = await Promise.all([getAppsByMaker(handle), getMakerDisplay(handle)]);
-      if (!active) return;
-      setApps(list);
-      setDisplay(disp);
-      setLoaded(true);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [handle]);
+export default function MakerBoot({
+  handle,
+  initialApps,
+  initialDisplay,
+}: {
+  handle: string;
+  initialApps: AppEntry[];
+  initialDisplay: MakerDisplay;
+}) {
+  const apps = initialApps;
+  const display = initialDisplay;
 
   const totals = useMemo(() => {
     const upvotes = apps.reduce((acc, a) => acc + a.upvotes, 0);
@@ -32,26 +28,6 @@ export default function MakerBoot({ handle }: { handle: string }) {
     apps.forEach((a) => a.tools.forEach((t) => tools.add(t)));
     return { upvotes, tools: tools.size };
   }, [apps]);
-
-  if (!loaded) {
-    return (
-      <div className="container-page py-24">
-        <div className="mx-auto h-6 w-32 animate-pulse rounded-full bg-paper/10" />
-      </div>
-    );
-  }
-
-  if (!display) {
-    return (
-      <div className="container-page py-24 text-center">
-        <div className="eyebrow mb-3">404</div>
-        <h1 className="display mb-6 text-[64px]">No maker by that name.</h1>
-        <LinkButton href="/" variant="paper" trailing={<ArrowGlyph />}>
-          Back to the gallery
-        </LinkButton>
-      </div>
-    );
-  }
 
   const initials = display.name
     .split(" ")
@@ -118,18 +94,11 @@ export default function MakerBoot({ handle }: { handle: string }) {
         </div>
       </div>
 
-      {apps.length === 0 ? (
-        <div className="flex min-h-[30vh] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-paper/20 p-10 text-center">
-          <div className="display text-3xl">Nothing shelved yet.</div>
-          <div className="text-paper-dim">This maker hasn't put anything up.</div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {apps.map((a, i) => (
-            <AppCard key={a.slug} app={a} index={i} />
-          ))}
-        </div>
-      )}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {apps.map((a, i) => (
+          <AppCard key={a.slug} app={a} index={i} />
+        ))}
+      </div>
     </div>
   );
 }

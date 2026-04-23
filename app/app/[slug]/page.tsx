@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import DetailBoot from "@/components/DetailBoot";
 import { fetchAppBySlug } from "@/lib/server";
 import { toolLabel } from "@/lib/tools";
@@ -41,6 +42,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default function AppDetailPage({ params }: { params: { slug: string } }) {
-  return <DetailBoot slug={params.slug} />;
+export default async function AppDetailPage({ params }: { params: { slug: string } }) {
+  const app = await fetchAppBySlug(params.slug);
+  if (!app) notFound();
+  return <DetailBoot slug={params.slug} initialApp={app} />;
 }

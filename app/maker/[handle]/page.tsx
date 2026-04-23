@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import MakerBoot from "@/components/MakerBoot";
 import { fetchAppsByMaker } from "@/lib/server";
 
@@ -42,6 +43,16 @@ export async function generateMetadata({ params }: { params: { handle: string } 
   };
 }
 
-export default function MakerPage({ params }: { params: { handle: string } }) {
-  return <MakerBoot handle={decodeURIComponent(params.handle)} />;
+export default async function MakerPage({ params }: { params: { handle: string } }) {
+  const handle = decodeURIComponent(params.handle);
+  const apps = await fetchAppsByMaker(handle);
+  if (apps.length === 0) notFound();
+
+  const withHandle = apps.find((a) => a.makerHandle);
+  const display = {
+    name: apps[0].makerName,
+    handle: withHandle?.makerHandle,
+  };
+
+  return <MakerBoot handle={handle} initialApps={apps} initialDisplay={display} />;
 }
