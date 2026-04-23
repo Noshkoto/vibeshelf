@@ -1,6 +1,5 @@
 import { cache } from "react";
 import { createClient } from "@supabase/supabase-js";
-import { SEED_APPS } from "./seed";
 import type { AppEntry, CategoryId, CoverPalette, ToolId } from "./types";
 
 interface DbApp {
@@ -47,7 +46,6 @@ function fromDb(row: DbApp, upvoteCount = 0): AppEntry {
     motif: row.motif as AppEntry["motif"],
     customCoverDataUrl: row.cover_url ?? undefined,
     createdAt: row.created_at,
-    seeded: false,
   };
 }
 
@@ -58,7 +56,7 @@ export function makerKey(app: AppEntry): string {
 
 export const fetchAllApps = cache(async (): Promise<AppEntry[]> => {
   const supa = getServerClient();
-  if (!supa) return SEED_APPS;
+  if (!supa) return [];
 
   const [appsRes, countsRes] = await Promise.all([
     supa.from("apps").select("*").order("created_at", { ascending: false }),
@@ -70,12 +68,7 @@ export const fetchAllApps = cache(async (): Promise<AppEntry[]> => {
     counts.set(c.app_slug, Number(c.upvote_count))
   );
 
-  const user = (appsRes.data ?? []).map((row: DbApp) => fromDb(row, counts.get(row.slug) ?? 0));
-  const seeds = SEED_APPS.map((s) => ({
-    ...s,
-    upvotes: s.upvotes + (counts.get(s.slug) ?? 0),
-  }));
-  return [...user, ...seeds];
+  return (appsRes.data ?? []).map((row: DbApp) => fromDb(row, counts.get(row.slug) ?? 0));
 });
 
 export async function fetchAppBySlug(slug: string): Promise<AppEntry | undefined> {

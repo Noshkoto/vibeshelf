@@ -16,8 +16,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const appRoutes: MetadataRoute.Sitemap = apps.map((a) => ({
     url: `${SITE_URL}/app/${a.slug}`,
     lastModified: a.createdAt,
-    changeFrequency: a.seeded ? "monthly" : "weekly",
-    priority: a.seeded ? 0.7 : 0.8,
+    changeFrequency: "weekly",
+    priority: 0.8,
   }));
 
   const makerKeys = Array.from(new Set(apps.map(makerKey).filter(Boolean)));

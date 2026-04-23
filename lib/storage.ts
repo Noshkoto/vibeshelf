@@ -1,6 +1,5 @@
 "use client";
 
-import { SEED_APPS } from "./seed";
 import { ensureSignedIn, getSupabase } from "./supabase";
 import type { AppEntry, CategoryId, CoverPalette, ToolId } from "./types";
 
@@ -38,11 +37,10 @@ function fromDb(row: DbApp, upvoteCount = 0): AppEntry {
     motif: row.motif as AppEntry["motif"],
     customCoverDataUrl: row.cover_url ?? undefined,
     createdAt: row.created_at,
-    seeded: false,
   };
 }
 
-async function fetchCatalog(): Promise<{ user: AppEntry[]; counts: Map<string, number> }> {
+export async function getAllApps(): Promise<AppEntry[]> {
   const supa = getSupabase();
   const [appsRes, countsRes] = await Promise.all([
     supa.from("apps").select("*").order("created_at", { ascending: false }),
@@ -54,17 +52,7 @@ async function fetchCatalog(): Promise<{ user: AppEntry[]; counts: Map<string, n
     counts.set(c.app_slug, Number(c.upvote_count))
   );
 
-  const user = (appsRes.data ?? []).map((row: DbApp) => fromDb(row, counts.get(row.slug) ?? 0));
-  return { user, counts };
-}
-
-export async function getAllApps(): Promise<AppEntry[]> {
-  const { user, counts } = await fetchCatalog();
-  const seeds = SEED_APPS.map((s) => ({
-    ...s,
-    upvotes: s.upvotes + (counts.get(s.slug) ?? 0),
-  }));
-  return [...user, ...seeds];
+  return (appsRes.data ?? []).map((row: DbApp) => fromDb(row, counts.get(row.slug) ?? 0));
 }
 
 export async function getAppBySlug(slug: string): Promise<AppEntry | undefined> {
