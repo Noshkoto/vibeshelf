@@ -1,17 +1,34 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { LinkButton, ArrowGlyph } from "@/components/Button";
 import Gallery from "@/components/Gallery";
 import Ticker from "@/components/Ticker";
+import {
+  allIssues,
+  currentIssue,
+  issueLabel,
+  shelfNumber,
+} from "@/lib/editorial";
+
+export const revalidate = 3600;
 
 export default function HomePage() {
+  const cur = currentIssue();
+  const curNumber = shelfNumber(cur.year, cur.month);
+  const issues = allIssues().slice().reverse();
+
   return (
     <div className="container-page relative pt-10">
       <section className="relative mb-20 grid grid-cols-12 gap-6 pt-8">
         <div className="col-span-12 lg:col-span-8">
-          <div className="eyebrow mb-6 flex items-center gap-3">
+          <Link
+            href={`/shelf/${cur.slug}`}
+            className="eyebrow mb-6 inline-flex items-center gap-3 transition-colors hover:text-paper"
+          >
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-acid" />
-            Shelf №{new Date().getFullYear() - 2025} · {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-          </div>
+            Shelf №{curNumber} · {issueLabel(cur)}
+            <span className="text-acid">→</span>
+          </Link>
           <h1 className="display text-[clamp(56px,9vw,144px)] text-balance">
             The <span className="hero-accent italic text-acid">shelf</span> for vibe-coded apps.
           </h1>
@@ -63,6 +80,44 @@ export default function HomePage() {
           <Gallery />
         </Suspense>
       </div>
+
+      <section className="mt-24">
+        <div className="rule-paper-dashed mb-8 opacity-40" />
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-baseline sm:justify-between">
+          <div>
+            <div className="eyebrow">Back issues</div>
+            <h3 className="display mt-2 text-[clamp(28px,3.6vw,40px)]">
+              The <em className="italic text-paper-dim">archive</em>.
+            </h3>
+          </div>
+          <p className="max-w-[38ch] text-[14px] leading-relaxed text-paper-dim">
+            The shelf resets every month. Past issues are kept in the stacks,
+            editor&apos;s note and all.
+          </p>
+        </div>
+        <ul className="mt-8 flex flex-wrap gap-3">
+          {issues.map((iss) => {
+            const n = shelfNumber(iss.year, iss.month);
+            const isCur = iss.slug === cur.slug;
+            return (
+              <li key={iss.slug}>
+                <Link
+                  href={`/shelf/${iss.slug}`}
+                  className={`group inline-flex items-center gap-2.5 rounded-full border px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors ${
+                    isCur
+                      ? "border-acid bg-acid/10 text-acid"
+                      : "border-paper/20 text-paper-dim hover:border-paper/50 hover:text-paper"
+                  }`}
+                >
+                  <span className="text-[10px] opacity-70">№{String(n).padStart(2, "0")}</span>
+                  <span>{issueLabel(iss)}</span>
+                  {isCur && <span className="text-[9px]">· current</span>}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
 
       <section id="about" className="mt-32 scroll-mt-20">
         <div className="rule-paper-dashed mb-12 opacity-40" />

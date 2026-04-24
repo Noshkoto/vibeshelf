@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { allIssues } from "@/lib/editorial";
 import { fetchAllApps, makerKey } from "@/lib/server";
 
 export const revalidate = 60;
@@ -20,6 +21,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  const issueRoutes: MetadataRoute.Sitemap = allIssues().map((iss) => ({
+    url: `${SITE_URL}/shelf/${iss.slug}`,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
+
   const makerKeys = Array.from(new Set(apps.map(makerKey).filter(Boolean)));
   const makerRoutes: MetadataRoute.Sitemap = makerKeys.map((key) => ({
     url: `${SITE_URL}/maker/${encodeURIComponent(key)}`,
@@ -27,5 +34,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  return [...staticRoutes, ...appRoutes, ...makerRoutes];
+  return [...staticRoutes, ...appRoutes, ...issueRoutes, ...makerRoutes];
 }

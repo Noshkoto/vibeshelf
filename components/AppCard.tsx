@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRef } from "react";
+import { builtNote } from "@/lib/editorial";
 import { categoryLabel } from "@/lib/tools";
 import type { AppEntry } from "@/lib/types";
 import CoverArt from "./CoverArt";
@@ -88,7 +89,12 @@ export default function AppCard({ app, index = 0, rank }: Props) {
             </span>
           </div>
           <h3 className="display mb-1 text-[28px] text-paper">{app.title}</h3>
-          <p className="mb-4 text-pretty text-[14px] leading-snug text-paper-dim">{app.tagline}</p>
+          <p className="mb-3 text-pretty text-[14px] leading-snug text-paper-dim">{app.tagline}</p>
+          {builtNote(app.slug) && (
+            <p className="mb-4 border-l-2 border-acid/40 pl-2 font-display text-[12px] italic leading-snug text-paper-dim/80">
+              {builtNote(app.slug)}
+            </p>
+          )}
           <div className="flex flex-wrap items-center gap-1.5">
             {app.tools.slice(0, 3).map((t) => (
               <ToolBadge key={t} tool={t} />

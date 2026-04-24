@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { builtNote } from "@/lib/editorial";
 import { deleteUserApp, isUserApp, makerKey } from "@/lib/storage";
 import { categoryLabel, toolLabel } from "@/lib/tools";
 import type { AppEntry } from "@/lib/types";
@@ -61,7 +62,17 @@ export default function DetailBoot({ slug, initialApp }: { slug: string; initial
 
           <div className="mt-10 max-w-[62ch]">
             <h1 className="display mb-4 text-[clamp(44px,6vw,72px)] text-balance">{app.title}</h1>
-            <p className="mb-8 text-pretty text-[20px] leading-[1.45] text-paper">{app.tagline}</p>
+            <p className="mb-6 text-pretty text-[20px] leading-[1.45] text-paper">{app.tagline}</p>
+            {builtNote(app.slug) && (
+              <figure className="mb-8 border-l-2 border-acid pl-4">
+                <blockquote className="font-display text-[17px] italic leading-[1.55] text-paper">
+                  {builtNote(app.slug)}
+                </blockquote>
+                <figcaption className="mt-2 font-mono text-[10px] uppercase tracking-[0.22em] text-paper-dim">
+                  — Curator&apos;s note
+                </figcaption>
+              </figure>
+            )}
             <div className="rule-paper-dashed mb-6 opacity-40" />
             <p className="text-pretty text-[16px] leading-[1.7] text-paper-dim">{app.description}</p>
           </div>
