@@ -5,6 +5,12 @@ import { useEffect, useRef } from "react";
 const INTERACTIVE = "a, button, [role='button'], input, textarea, [data-hover]";
 const IDLE_SIZE = 18;
 const HOVER_PAD = 8;
+// Only snap the frame to an element's bounds when the element is large enough
+// that framing it reads as "focus reticle" rather than "selection". Small
+// interactives (buttons, chips, links) keep the cursor pointer-sized and just
+// tint acid so the pointer continues to point.
+const SNAP_MIN_W = 180;
+const SNAP_MIN_H = 140;
 
 interface TargetState {
   x: number;
@@ -12,6 +18,7 @@ interface TargetState {
   w: number;
   h: number;
   hover: boolean;
+  snap: boolean;
   label: string | null;
 }
 
@@ -32,6 +39,7 @@ export default function CursorRing() {
       w: IDLE_SIZE,
       h: IDLE_SIZE,
       hover: false,
+      snap: false,
       label: null,
     };
     const render = { ...target };
@@ -83,11 +91,20 @@ export default function CursorRing() {
           target.label = labelFor(interactive);
         }
         const r = interactive.getBoundingClientRect();
-        target.x = r.left + r.width / 2;
-        target.y = r.top + r.height / 2;
-        target.w = r.width + HOVER_PAD * 2;
-        target.h = r.height + HOVER_PAD * 2;
+        const shouldSnap = r.width >= SNAP_MIN_W && r.height >= SNAP_MIN_H;
         target.hover = true;
+        target.snap = shouldSnap;
+        if (shouldSnap) {
+          target.x = r.left + r.width / 2;
+          target.y = r.top + r.height / 2;
+          target.w = r.width + HOVER_PAD * 2;
+          target.h = r.height + HOVER_PAD * 2;
+        } else {
+          target.x = clientX;
+          target.y = clientY;
+          target.w = IDLE_SIZE;
+          target.h = IDLE_SIZE;
+        }
       } else {
         currentHovered = null;
         target.x = clientX;
@@ -95,6 +112,7 @@ export default function CursorRing() {
         target.w = IDLE_SIZE;
         target.h = IDLE_SIZE;
         target.hover = false;
+        target.snap = false;
         target.label = null;
       }
     }
@@ -103,7 +121,7 @@ export default function CursorRing() {
       updateTargetFor(e.clientX, e.clientY, e.target as Element | null);
     }
     function onScroll() {
-      if (currentHovered) {
+      if (currentHovered && target.snap) {
         const r = currentHovered.getBoundingClientRect();
         target.x = r.left + r.width / 2;
         target.y = r.top + r.height / 2;
@@ -113,6 +131,7 @@ export default function CursorRing() {
       target.x = -400;
       target.y = -400;
       target.hover = false;
+      target.snap = false;
       target.label = null;
       currentHovered = null;
     }
@@ -124,9 +143,9 @@ export default function CursorRing() {
     }
 
     function tick() {
-      const snap = target.hover ? 0.38 : 0.55;
-      render.x += (target.x - render.x) * snap;
-      render.y += (target.y - render.y) * snap;
+      const posEase = target.snap ? 0.38 : 0.55;
+      render.x += (target.x - render.x) * posEase;
+      render.y += (target.y - render.y) * posEase;
       render.w += (target.w - render.w) * 0.42;
       render.h += (target.h - render.h) * 0.42;
       dotX += (target.x - dotX) * 0.7;
@@ -144,7 +163,9 @@ export default function CursorRing() {
         frame.dataset.hover = target.hover ? "true" : "false";
       }
       if (dot) {
-        const dotOpacity = target.hover ? 0 : 1;
+        // Hide the precision dot only when the frame snaps to an element;
+        // on small hovers the pointer should keep pointing.
+        const dotOpacity = target.snap ? 0 : 1;
         dot.style.transform = `translate3d(${dotX}px, ${dotY}px, 0) translate(-50%, -50%)`;
         dot.style.opacity = String(dotOpacity);
       }

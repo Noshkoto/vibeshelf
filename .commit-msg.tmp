@@ -1,0 +1,12 @@
+Only snap the cursor frame on large targets.
+
+The bracket-snap read as "selection" on button-sized elements, which
+felt like the cursor was taking over whatever you pointed at. Now the
+frame only snaps to bounds when the element is at least 180x140 — big
+enough that a camera-focus reticle reads as framing, not selecting.
+Small interactives (buttons, chips, text links, inputs) keep the
+cursor pointer-sized and simply tint the brackets acid, so the
+pointer continues to point while still signalling interactivity. The
+link-destination tag and press-pulse behave the same in both modes.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
