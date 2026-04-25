@@ -1,3 +1,20 @@
+export type LlmId =
+  | "gpt-4o"
+  | "gpt-5"
+  | "o3"
+  | "claude-sonnet"
+  | "claude-opus"
+  | "gemini-pro"
+  | "gemini-flash"
+  | "llama-4"
+  | "deepseek-r1"
+  | "deepseek-v3"
+  | "grok"
+  | "mistral"
+  | "qwen"
+  | "phi-4"
+  | "gemma";
+
 export type ToolId =
   | "hermes"
   | "openclaw"
@@ -47,5 +64,6 @@ export interface AppEntry {
   palette: CoverPalette;
   motif: "grid" | "wave" | "orbits" | "stack" | "glyph" | "halftone";
   customCoverDataUrl?: string;
+  llms?: LlmId[];
   createdAt: string;
 }

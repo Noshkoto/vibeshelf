@@ -1,7 +1,7 @@
 "use client";
 
 import { ensureSignedIn, getSupabase } from "./supabase";
-import type { AppEntry, CategoryId, CoverPalette, ToolId } from "./types";
+import type { AppEntry, CategoryId, CoverPalette, LlmId, ToolId } from "./types";
 
 interface DbApp {
   id: string;
@@ -17,6 +17,7 @@ interface DbApp {
   palette: string;
   motif: string;
   cover_url: string | null;
+  llms: string[] | null;
   owner_id: string;
   created_at: string;
 }
@@ -36,6 +37,7 @@ function fromDb(row: DbApp, upvoteCount = 0): AppEntry {
     palette: row.palette as CoverPalette,
     motif: row.motif as AppEntry["motif"],
     customCoverDataUrl: row.cover_url ?? undefined,
+    llms: (row.llms ?? []) as LlmId[],
     createdAt: row.created_at,
   };
 }
@@ -80,6 +82,7 @@ export async function saveUserApp(entry: AppEntry): Promise<AppEntry | null> {
       palette: entry.palette,
       motif: entry.motif,
       cover_url: entry.customCoverDataUrl ?? null,
+      llms: entry.llms ?? [],
       owner_id: ownerId,
     })
     .select()

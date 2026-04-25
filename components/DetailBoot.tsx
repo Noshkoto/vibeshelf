@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { builtNote } from "@/lib/editorial";
 import { deleteUserApp, isUserApp, makerKey } from "@/lib/storage";
+import { llmLabel, LLMS } from "@/lib/llms";
 import { categoryLabel, toolLabel } from "@/lib/tools";
 import type { AppEntry } from "@/lib/types";
 import { ArrowGlyph, LinkButton } from "./Button";
@@ -94,6 +95,26 @@ export default function DetailBoot({ slug, initialApp }: { slug: string; initial
                   <ToolBadge key={t} tool={t} size="md" />
                 ))}
               </div>
+              {app.llms && app.llms.length > 0 && (
+                <>
+                  <div className="rule-paper-dashed my-4 opacity-40" />
+                  <div className="eyebrow mb-3">Powered by</div>
+                  <div className="flex flex-wrap gap-2">
+                    {app.llms.map((id) => {
+                      const entry = LLMS.find((l) => l.id === id);
+                      return (
+                        <span
+                          key={id}
+                          className="inline-flex h-7 items-center gap-1.5 rounded-full border border-paper/30 px-3 font-mono text-[11px] uppercase tracking-[0.18em] text-paper"
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-acid" />
+                          {entry?.label ?? llmLabel(id)}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
               <div className="rule-paper-dashed my-5 opacity-40" />
               <div className="eyebrow mb-3">Maker</div>
               <Link
@@ -117,6 +138,9 @@ export default function DetailBoot({ slug, initialApp }: { slug: string; initial
               <dl className="space-y-2 text-[13px]">
                 <Row k="Category" v={categoryLabel(app.category)} />
                 <Row k="Tools" v={app.tools.map(toolLabel).join(" · ")} />
+                {app.llms && app.llms.length > 0 && (
+                  <Row k="LLMs" v={app.llms.map(llmLabel).join(" · ")} />
+                )}
                 <Row k="Shelved" v={new Date(app.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} />
                 <Row k="URL" v={prettyUrl(app.liveUrl)} />
               </dl>

@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CATEGORIES, TOOLS } from "@/lib/tools";
+import { LLMS } from "@/lib/llms";
 import { ensureUniqueSlug, saveUserApp, slugify, uploadCover } from "@/lib/storage";
-import type { AppEntry, CategoryId, CoverPalette, ToolId } from "@/lib/types";
+import type { AppEntry, CategoryId, CoverPalette, LlmId, ToolId } from "@/lib/types";
 import AppCard from "./AppCard";
 import { ArrowGlyph, Button, LinkButton } from "./Button";
 import CoverArt from "./CoverArt";
@@ -25,6 +26,7 @@ interface Draft {
   makerName: string;
   makerHandle: string;
   tools: ToolId[];
+  llms: LlmId[];
   category: CategoryId;
   palette: CoverPalette;
   motif: AppEntry["motif"];
@@ -40,6 +42,7 @@ const BLANK: Draft = {
   makerName: "",
   makerHandle: "",
   tools: [],
+  llms: [],
   category: "creative",
   palette: "citrus",
   motif: "grid",
@@ -87,6 +90,7 @@ export default function Submit() {
       makerName: draft.makerName || "Anonymous maker",
       makerHandle: draft.makerHandle || undefined,
       tools: draft.tools.length ? draft.tools : ["cursor"],
+      llms: draft.llms,
       category: draft.category,
       upvotes: 1,
       palette: draft.palette,
@@ -479,12 +483,16 @@ function DetailsStep({ draft, update }: { draft: Draft; update: <K extends keyof
 }
 
 function StackStep({ draft, update }: { draft: Draft; update: <K extends keyof Draft>(k: K, v: Draft[K]) => void }) {
-  function toggle(id: ToolId) {
+  function toggleTool(id: ToolId) {
     const has = draft.tools.includes(id);
     update("tools", has ? draft.tools.filter((t) => t !== id) : [...draft.tools, id]);
   }
+  function toggleLlm(id: LlmId) {
+    const has = draft.llms.includes(id);
+    update("llms", has ? draft.llms.filter((l) => l !== id) : [...draft.llms, id]);
+  }
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
         <div className="eyebrow mb-2">Step 3 / 4</div>
         <h2 className="display text-[36px]">How'd you build it?</h2>
@@ -493,32 +501,61 @@ function StackStep({ draft, update }: { draft: Draft; update: <K extends keyof D
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {TOOLS.map((t) => {
-          const on = draft.tools.includes(t.id);
-          return (
-            <button
-              key={t.id}
-              onClick={() => toggle(t.id)}
-              className={`h-11 rounded-[10px] border px-4 font-mono text-[12px] uppercase tracking-[0.18em] transition-all ${
-                on
-                  ? "border-ink bg-acid text-ink shadow-[3px_3px_0_0_#0B0B0A] -translate-y-[1px]"
-                  : "border-paper/20 text-paper-dim hover:border-paper/50 hover:text-paper"
-              }`}
-            >
-              {t.label}
-            </button>
-          );
-        })}
+      <div>
+        <div className="eyebrow mb-3">Coding tool</div>
+        <div className="flex flex-wrap gap-2">
+          {TOOLS.map((t) => {
+            const on = draft.tools.includes(t.id);
+            return (
+              <button
+                key={t.id}
+                onClick={() => toggleTool(t.id)}
+                className={`h-11 rounded-[10px] border px-4 font-mono text-[12px] uppercase tracking-[0.18em] transition-all ${
+                  on
+                    ? "border-ink bg-acid text-ink shadow-[3px_3px_0_0_#0B0B0A] -translate-y-[1px]"
+                    : "border-paper/20 text-paper-dim hover:border-paper/50 hover:text-paper"
+                }`}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+        {draft.tools.length === 0 && (
+          <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ember">
+            Select at least one tool to continue.
+          </p>
+        )}
       </div>
 
-      <div className="rounded-2xl border border-paper/10 bg-ink-soft p-5">
-        <div className="eyebrow mb-2">Picked</div>
-        <div className="text-[14px] text-paper-dim">
-          {draft.tools.length === 0
-            ? "Select at least one tool."
-            : draft.tools.map((t) => TOOLS.find((x) => x.id === t)?.label).join(" · ")}
+      <div className="rule-paper-dashed opacity-40" />
+
+      <div>
+        <div className="eyebrow mb-1">LLM · optional</div>
+        <p className="mb-3 text-[13px] text-paper-dim">Which model(s) powered the project?</p>
+        <div className="flex flex-wrap gap-2">
+          {LLMS.map((l) => {
+            const on = draft.llms.includes(l.id);
+            return (
+              <button
+                key={l.id}
+                onClick={() => toggleLlm(l.id)}
+                className={`h-11 rounded-[10px] border px-4 font-mono text-[12px] uppercase tracking-[0.18em] transition-all ${
+                  on
+                    ? "border-ink bg-acid text-ink shadow-[3px_3px_0_0_#0B0B0A] -translate-y-[1px]"
+                    : "border-paper/20 text-paper-dim hover:border-paper/50 hover:text-paper"
+                }`}
+              >
+                {l.label}
+              </button>
+            );
+          })}
         </div>
+        {draft.llms.length > 0 && (
+          <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-paper-dim">
+            {draft.llms.map((id) => LLMS.find((l) => l.id === id)?.label).join(" · ")}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -576,6 +613,10 @@ function ReviewStep({ draft }: { draft: Draft }) {
           <ReviewRow
             k="Tools"
             v={draft.tools.length ? draft.tools.map((t) => TOOLS.find((x) => x.id === t)?.label).join(" · ") : "—"}
+          />
+          <ReviewRow
+            k="LLMs"
+            v={draft.llms.length ? draft.llms.map((l) => LLMS.find((x) => x.id === l)?.label).join(" · ") : "—"}
           />
           <ReviewRow k="Maker" v={`${draft.makerName || "—"}${draft.makerHandle ? ` · ${draft.makerHandle}` : ""}`} />
         </dl>
