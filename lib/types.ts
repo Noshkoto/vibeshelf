@@ -1,14 +1,15 @@
 export type ToolId =
+  | "hermes"
+  | "openclaw"
+  | "claude-code"
+  | "codex"
   | "cursor"
   | "lovable"
   | "v0"
   | "bolt"
-  | "claude-code"
   | "replit-agent"
   | "windsurf"
-  | "claude-api"
-  | "hermes"
-  | "openclaw";
+  | "claude-api";
 
 export type CategoryId =
   | "productivity"

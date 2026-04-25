@@ -1,16 +1,17 @@
 import type { CategoryId, ToolId } from "./types";
 
 export const TOOLS: { id: ToolId; label: string }[] = [
+  { id: "hermes", label: "Hermes" },
+  { id: "openclaw", label: "OpenClaw" },
+  { id: "claude-code", label: "Claude Code" },
+  { id: "codex", label: "Codex" },
   { id: "cursor", label: "Cursor" },
   { id: "lovable", label: "Lovable" },
   { id: "v0", label: "v0" },
   { id: "bolt", label: "Bolt" },
-  { id: "claude-code", label: "Claude Code" },
   { id: "replit-agent", label: "Replit Agent" },
   { id: "windsurf", label: "Windsurf" },
   { id: "claude-api", label: "Claude API" },
-  { id: "hermes", label: "Hermes" },
-  { id: "openclaw", label: "OpenClaw" },
 ];
 
 export const CATEGORIES: { id: CategoryId; label: string }[] = [
