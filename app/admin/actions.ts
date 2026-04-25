@@ -16,7 +16,7 @@ function getAdminSupabase() {
 }
 
 export async function isAdminAuthed(): Promise<boolean> {
-  const secret = process.env.ADMIN_SECRET;
+  const secret = (process.env.ADMIN_SECRET ?? "").trim();
   if (!secret) return false;
   const cookieStore = await cookies();
   return cookieStore.get(COOKIE_NAME)?.value === secret;
@@ -24,7 +24,7 @@ export async function isAdminAuthed(): Promise<boolean> {
 
 export async function loginAction(formData: FormData) {
   const password = formData.get("password") as string;
-  const secret = process.env.ADMIN_SECRET ?? "";
+  const secret = (process.env.ADMIN_SECRET ?? "").trim();
 
   if (!password || !secret || password !== secret) {
     redirect("/admin?error=1");
