@@ -6,7 +6,9 @@ export type ToolId =
   | "claude-code"
   | "replit-agent"
   | "windsurf"
-  | "claude-api";
+  | "claude-api"
+  | "hermes"
+  | "openclaw";
 
 export type CategoryId =
   | "productivity"

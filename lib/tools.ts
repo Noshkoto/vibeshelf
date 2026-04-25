@@ -9,6 +9,8 @@ export const TOOLS: { id: ToolId; label: string }[] = [
   { id: "replit-agent", label: "Replit Agent" },
   { id: "windsurf", label: "Windsurf" },
   { id: "claude-api", label: "Claude API" },
+  { id: "hermes", label: "Hermes" },
+  { id: "openclaw", label: "OpenClaw" },
 ];
 
 export const CATEGORIES: { id: CategoryId; label: string }[] = [

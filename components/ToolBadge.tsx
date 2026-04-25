@@ -70,6 +70,17 @@ function Dot({ tool }: { tool: ToolId }) {
         <path d="M2 8 L5 2 L8 8 M3.5 6 H6.5" stroke={base} strokeWidth="1.4" fill="none" strokeLinecap="square" />
       </svg>
     ),
+    hermes: (
+      <svg viewBox="0 0 10 10" className="h-2.5 w-2.5" aria-hidden>
+        <path d="M5 1 L5 9 M2 3 H8 M2 7 H8" stroke={base} strokeWidth="1.4" fill="none" strokeLinecap="square" />
+      </svg>
+    ),
+    openclaw: (
+      <svg viewBox="0 0 10 10" className="h-2.5 w-2.5" aria-hidden>
+        <path d="M2 8 C2 4 4 2 5 2 C6 2 8 4 8 8" stroke={base} strokeWidth="1.4" fill="none" strokeLinecap="round" />
+        <path d="M4 8 C4 6 5 5 5 5 C5 5 6 6 6 8" stroke={base} strokeWidth="1.4" fill="none" strokeLinecap="round" />
+      </svg>
+    ),
   };
   return map[tool];
 }
