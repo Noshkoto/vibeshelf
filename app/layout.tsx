@@ -53,9 +53,17 @@ export const metadata: Metadata = {
   },
 };
 
+// Runs before React hydration so the theme is applied before first paint —
+// prevents the flash-of-wrong-theme that happens if you set the class from
+// a useEffect. Reads localStorage, falls back to prefers-color-scheme.
+const THEME_BOOT = `(function(){try{var s=localStorage.getItem('vibeshelf-theme');var p=window.matchMedia('(prefers-color-scheme: light)').matches;var t=s||(p?'light':'dark');if(t==='light')document.documentElement.classList.add('light');}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
+      </head>
       <body>
         <CursorRing />
         <CommandPalette />

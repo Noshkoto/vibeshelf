@@ -1,24 +1,29 @@
 import type { Config } from "tailwindcss";
 
+// Colors are CSS-variable-backed so they can be flipped for light mode
+// without touching any className across the codebase. See app/globals.css
+// for the dark defaults and the `.light` override set.
+const rgb = (name: string) => `rgb(var(--color-${name}) / <alpha-value>)`;
+
 const config: Config = {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
         ink: {
-          DEFAULT: "#0B0B0A",
-          soft: "#161513",
-          mid: "#232019",
-          line: "#2E2A22",
+          DEFAULT: rgb("ink"),
+          soft: rgb("ink-soft"),
+          mid: rgb("ink-mid"),
+          line: rgb("ink-line"),
         },
         paper: {
-          DEFAULT: "#F4EAD5",
-          soft: "#EADFC6",
-          dim: "#C9BFA5",
+          DEFAULT: rgb("paper"),
+          soft: rgb("paper-soft"),
+          dim: rgb("paper-dim"),
         },
-        acid: "#D4FF3B",
-        ember: "#FF5B2E",
-        dusk: "#6B6456",
+        acid: rgb("acid"),
+        ember: rgb("ember"),
+        dusk: rgb("dusk"),
       },
       fontFamily: {
         display: ["var(--font-display)", "Georgia", "serif"],
@@ -29,6 +34,7 @@ const config: Config = {
         tightest: "-0.04em",
       },
       boxShadow: {
+        // Offset-print shadows stay dark in both modes — a shadow is a shadow.
         keycap:
           "inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -2px 0 rgba(0,0,0,0.5), 0 2px 0 #0B0B0A, 0 4px 16px rgba(0,0,0,0.4)",
         "keycap-pressed":

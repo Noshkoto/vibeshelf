@@ -17,15 +17,16 @@ export default function ToolBadge({ tool, tone = "paper", size = "sm" }: Props) 
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border font-mono uppercase tracking-[0.18em] ${sizing} ${tones}`}
     >
-      <Dot tool={tool} tone={tone} />
+      <Dot tool={tool} />
       {toolLabel(tool)}
     </span>
   );
 }
 
-function Dot({ tool, tone }: { tool: ToolId; tone: "paper" | "ink" }) {
-  // Each tool gets its own mark — a tiny glyph, not a color dot
-  const base = tone === "ink" ? "#0B0B0A" : "#F4EAD5";
+function Dot({ tool }: { tool: ToolId }) {
+  // Glyphs inherit `currentColor` from the badge's text color so they follow
+  // theme flips without any per-call wiring.
+  const base = "currentColor";
   const map: Record<ToolId, JSX.Element> = {
     cursor: (
       <svg viewBox="0 0 10 10" className="h-2.5 w-2.5" aria-hidden>

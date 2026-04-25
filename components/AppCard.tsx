@@ -73,7 +73,7 @@ export default function AppCard({ app, index = 0, rank }: Props) {
 
           <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-ink/80 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-paper backdrop-blur">
             <svg viewBox="0 0 10 10" className="h-2.5 w-2.5" aria-hidden>
-              <path d="M5 1 L9 5 L5 9 L1 5 Z" fill="#D4FF3B" />
+              <path d="M5 1 L9 5 L5 9 L1 5 Z" fill="var(--acid)" />
             </svg>
             {app.upvotes}
           </div>
@@ -112,7 +112,7 @@ export default function AppCard({ app, index = 0, rank }: Props) {
           className="pointer-events-none absolute inset-0 rounded-[14px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           style={{
             background:
-              "radial-gradient(480px circle at var(--mx, 50%) var(--my, 50%), rgba(212,255,59,0.14), transparent 42%)",
+              "radial-gradient(480px circle at var(--mx, 50%) var(--my, 50%), rgb(var(--color-acid) / 0.14), transparent 42%)",
           }}
         />
 

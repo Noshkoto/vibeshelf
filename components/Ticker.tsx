@@ -41,7 +41,7 @@ export default function Ticker() {
             >
               <span
                 className="inline-block h-1.5 w-1.5 rounded-full bg-acid"
-                style={{ boxShadow: "0 0 10px rgba(212,255,59,0.7)" }}
+                style={{ boxShadow: "0 0 10px rgb(var(--color-acid) / 0.7)" }}
               />
               <span className="text-paper">New arrival</span>
               <span className="text-paper-dim">·</span>

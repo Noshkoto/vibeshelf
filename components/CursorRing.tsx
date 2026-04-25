@@ -227,7 +227,7 @@ export default function CursorRing() {
         className="pointer-events-none fixed left-0 top-0 z-[301] h-[3px] w-[3px] rounded-full bg-acid transition-opacity duration-150"
         style={{
           willChange: "transform, opacity",
-          boxShadow: "0 0 6px rgba(212,255,59,0.9)",
+          boxShadow: "0 0 6px rgb(var(--color-acid) / 0.9)",
         }}
       />
 

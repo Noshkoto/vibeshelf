@@ -211,7 +211,7 @@ export default function CommandPalette() {
 }
 
 function Glyph({ kind, active }: { kind: Item["kind"]; active: boolean }) {
-  const color = active ? "#D4FF3B" : "#C9BFA5";
+  const color = active ? "rgb(var(--color-acid))" : "rgb(var(--color-paper-dim))";
   if (kind === "app") {
     return (
       <svg viewBox="0 0 12 12" className="h-3.5 w-3.5" aria-hidden>
