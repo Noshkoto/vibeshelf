@@ -67,26 +67,32 @@ export async function saveUserApp(entry: AppEntry): Promise<AppEntry | null> {
   if (!ownerId) return null;
   const supa = getSupabase();
 
-  const { data, error } = await supa
-    .from("apps")
-    .insert({
-      slug: entry.slug,
-      title: entry.title,
-      tagline: entry.tagline,
-      description: entry.description,
-      live_url: entry.liveUrl,
-      maker_name: entry.makerName,
-      maker_handle: entry.makerHandle ?? null,
-      tools: entry.tools,
-      category: entry.category,
-      palette: entry.palette,
-      motif: entry.motif,
-      cover_url: entry.customCoverDataUrl ?? null,
-      llms: entry.llms ?? [],
-      owner_id: ownerId,
-    })
-    .select()
-    .single();
+  const payload = {
+    slug: entry.slug,
+    title: entry.title,
+    tagline: entry.tagline,
+    description: entry.description,
+    live_url: entry.liveUrl,
+    maker_name: entry.makerName,
+    maker_handle: entry.makerHandle ?? null,
+    tools: entry.tools,
+    category: entry.category,
+    palette: entry.palette,
+    motif: entry.motif,
+    cover_url: entry.customCoverDataUrl ?? null,
+    llms: entry.llms ?? [],
+    owner_id: ownerId,
+  };
+
+  let { data, error } = await supa.from("apps").insert(payload).select().single();
+
+  // Migration 002_add_llms.sql may not have run on this Supabase project yet —
+  // fall back to inserting without the llms column so submissions still work.
+  if (error?.code === "42703" && /llms/i.test(error.message)) {
+    const { llms: _drop, ...legacy } = payload;
+    void _drop;
+    ({ data, error } = await supa.from("apps").insert(legacy).select().single());
+  }
 
   if (error || !data) {
     // eslint-disable-next-line no-console
