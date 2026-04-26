@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Fraunces, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import CommandPalette from "@/components/CommandPalette";
-import CursorRing from "@/components/CursorRing";
 import Nav from "@/components/Nav";
 
 const display = Fraunces({
@@ -65,7 +64,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
       </head>
       <body>
-        <CursorRing />
         <CommandPalette />
         <Nav />
         <main>{children}</main>
