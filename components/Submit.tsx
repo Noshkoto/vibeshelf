@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CATEGORIES, TOOLS } from "@/lib/tools";
 import { LLMS } from "@/lib/llms";
-import { ensureUniqueSlug, saveUserApp, slugify, uploadCover } from "@/lib/storage";
+import { ensureUniqueSlug, saveUserAppDetailed, slugify, uploadCover } from "@/lib/storage";
 import type { AppEntry, CategoryId, CoverPalette, LlmId, ToolId } from "@/lib/types";
 import AppCard from "./AppCard";
 import { ArrowGlyph, Button, LinkButton } from "./Button";
@@ -129,8 +129,8 @@ export default function Submit() {
         slug,
         customCoverDataUrl: coverUrl,
       };
-      const saved = await saveUserApp(entry);
-      if (!saved) throw new Error("Couldn't save your app. Please try again.");
+      const result = await saveUserAppDetailed(entry);
+      if (!result.ok) throw new Error(result.message);
       setPublished(slug);
     } catch (err) {
       setPublishError(err instanceof Error ? err.message : "Something went wrong.");

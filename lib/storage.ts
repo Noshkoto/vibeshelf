@@ -68,12 +68,31 @@ export async function getAppBySlug(slug: string): Promise<AppEntry | undefined> 
   return all.find((a) => a.slug === slug);
 }
 
-export async function saveUserApp(entry: AppEntry): Promise<AppEntry | null> {
+export type SaveResult =
+  | { ok: true; app: AppEntry }
+  | { ok: false; reason: "auth" | "schema" | "duplicate" | "unknown"; message: string };
+
+const OPTIONAL_COLUMNS = ["llms", "hours_to_ship", "key_prompt", "gotcha"] as const;
+
+function isMissingColumnError(error: { code?: string; message?: string } | null): string | null {
+  if (!error) return null;
+  // 42703 = Postgres "undefined column"; PGRST204 = PostgREST schema-cache miss.
+  if (error.code !== "42703" && error.code !== "PGRST204") return null;
+  const msg = error.message ?? "";
+  for (const col of OPTIONAL_COLUMNS) {
+    if (msg.toLowerCase().includes(col)) return col;
+  }
+  return null;
+}
+
+export async function saveUserAppDetailed(entry: AppEntry): Promise<SaveResult> {
   const ownerId = await ensureSignedIn();
-  if (!ownerId) return null;
+  if (!ownerId) {
+    return { ok: false, reason: "auth", message: "Couldn't start an anonymous session. Check your connection and try again." };
+  }
   const supa = getSupabase();
 
-  const payload = {
+  const payload: Record<string, unknown> = {
     slug: entry.slug,
     title: entry.title,
     tagline: entry.tagline,
@@ -93,28 +112,40 @@ export async function saveUserApp(entry: AppEntry): Promise<AppEntry | null> {
     owner_id: ownerId,
   };
 
-  let { data, error } = await supa.from("apps").insert(payload).select().single();
-
-  // Migrations may not have run on every Supabase project yet — strip unknown
-  // columns and retry so submissions still work against older schemas.
-  if (error?.code === "42703") {
-    const msg = error.message ?? "";
-    const legacy: Record<string, unknown> = { ...payload };
-    if (/llms/i.test(msg)) delete legacy.llms;
-    if (/hours_to_ship/i.test(msg)) delete legacy.hours_to_ship;
-    if (/key_prompt/i.test(msg)) delete legacy.key_prompt;
-    if (/gotcha/i.test(msg)) delete legacy.gotcha;
-    ({ data, error } = await supa.from("apps").insert(legacy).select().single());
+  // Iteratively strip optional columns the live schema doesn't know about yet,
+  // covering both Postgres (42703) and PostgREST schema-cache (PGRST204) misses.
+  let attempt = 0;
+  let data: DbApp | null = null;
+  let error: { code?: string; message?: string } | null = null;
+  while (attempt++ < OPTIONAL_COLUMNS.length + 1) {
+    const res = await supa.from("apps").insert(payload).select().single();
+    data = (res.data as DbApp | null) ?? null;
+    error = res.error;
+    if (!error) break;
+    const missing = isMissingColumnError(error);
+    if (!missing || !(missing in payload)) break;
+    delete payload[missing];
   }
 
   if (error || !data) {
     // eslint-disable-next-line no-console
     console.error("saveUserApp failed", error);
-    return null;
+    if (error?.code === "23505") {
+      return { ok: false, reason: "duplicate", message: "That slug is already taken — try a slightly different title." };
+    }
+    if (error?.code === "42703" || error?.code === "PGRST204") {
+      return { ok: false, reason: "schema", message: error.message ?? "Database schema is out of date." };
+    }
+    return { ok: false, reason: "unknown", message: error?.message ?? "Couldn't save your app. Please try again." };
   }
 
   await supa.from("upvotes").insert({ app_slug: entry.slug, owner_id: ownerId });
-  return fromDb(data as DbApp, 1);
+  return { ok: true, app: fromDb(data, 1) };
+}
+
+export async function saveUserApp(entry: AppEntry): Promise<AppEntry | null> {
+  const result = await saveUserAppDetailed(entry);
+  return result.ok ? result.app : null;
 }
 
 export async function deleteUserApp(slug: string): Promise<boolean> {
