@@ -49,8 +49,17 @@ export default async function OpengraphImage() {
           <div style={{ fontSize: 132, lineHeight: 1, letterSpacing: -2, fontWeight: 600 }}>
             The shelf for
           </div>
-          <div style={{ fontSize: 132, lineHeight: 1, letterSpacing: -2, fontWeight: 600 }}>
-            <span style={{ fontStyle: "italic", color: "#D4FF3B" }}>vibe-coded</span> apps.
+          <div
+            style={{
+              display: "flex",
+              fontSize: 132,
+              lineHeight: 1,
+              letterSpacing: -2,
+              fontWeight: 600,
+            }}
+          >
+            <span style={{ fontStyle: "italic", color: "#D4FF3B" }}>vibe-coded</span>
+            <span>&nbsp;apps.</span>
           </div>
         </div>
 
