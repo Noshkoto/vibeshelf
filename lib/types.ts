@@ -65,5 +65,8 @@ export interface AppEntry {
   motif: "grid" | "wave" | "orbits" | "stack" | "glyph" | "halftone";
   customCoverDataUrl?: string;
   llms?: LlmId[];
+  hoursToShip?: number;
+  keyPrompt?: string;
+  gotcha?: string;
   createdAt: string;
 }

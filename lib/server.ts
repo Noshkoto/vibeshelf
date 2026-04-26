@@ -17,6 +17,9 @@ interface DbApp {
   motif: string;
   cover_url: string | null;
   llms: string[] | null;
+  hours_to_ship: number | string | null;
+  key_prompt: string | null;
+  gotcha: string | null;
   owner_id: string;
   created_at: string;
 }
@@ -47,6 +50,9 @@ function fromDb(row: DbApp, upvoteCount = 0): AppEntry {
     motif: row.motif as AppEntry["motif"],
     customCoverDataUrl: row.cover_url ?? undefined,
     llms: (row.llms ?? []) as LlmId[],
+    hoursToShip: row.hours_to_ship == null ? undefined : Number(row.hours_to_ship),
+    keyPrompt: row.key_prompt ?? undefined,
+    gotcha: row.gotcha ?? undefined,
     createdAt: row.created_at,
   };
 }

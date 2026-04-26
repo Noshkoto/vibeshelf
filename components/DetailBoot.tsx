@@ -10,6 +10,7 @@ import { categoryLabel, toolLabel } from "@/lib/tools";
 import type { AppEntry } from "@/lib/types";
 import { ArrowGlyph, LinkButton } from "./Button";
 import CoverArt from "./CoverArt";
+import ShareDialog from "./ShareDialog";
 import ToolBadge from "./ToolBadge";
 import UpvoteButton from "./UpvoteButton";
 
@@ -76,6 +77,47 @@ export default function DetailBoot({ slug, initialApp }: { slug: string; initial
             )}
             <div className="rule-paper-dashed mb-6 opacity-40" />
             <p className="text-pretty text-[16px] leading-[1.7] text-paper-dim">{app.description}</p>
+
+            {(app.hoursToShip != null || app.keyPrompt || app.gotcha) && (
+              <section className="mt-12">
+                <div className="eyebrow mb-4">How they built it</div>
+                <div className="grid grid-cols-12 gap-5">
+                  {app.hoursToShip != null && (
+                    <div className="col-span-12 sm:col-span-4 rounded-2xl border border-paper/15 bg-ink-soft p-5">
+                      <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-paper-dim">
+                        Hours to ship
+                      </div>
+                      <div className="display mt-2 text-[44px] leading-none text-paper">
+                        {formatHours(app.hoursToShip)}
+                      </div>
+                      <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.22em] text-paper-dim">
+                        {hoursLabel(app.hoursToShip)}
+                      </div>
+                    </div>
+                  )}
+                  {app.keyPrompt && (
+                    <div className="col-span-12 sm:col-span-8 rounded-2xl border border-paper/15 bg-ink-soft p-5">
+                      <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-paper-dim">
+                        The prompt that cracked it
+                      </div>
+                      <p className="mt-3 font-display text-[16px] italic leading-[1.55] text-paper">
+                        &ldquo;{app.keyPrompt}&rdquo;
+                      </p>
+                    </div>
+                  )}
+                  {app.gotcha && (
+                    <div className="col-span-12 rounded-2xl border border-dashed border-paper/20 p-5">
+                      <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-paper-dim">
+                        One thing that didn&apos;t work
+                      </div>
+                      <p className="mt-3 text-[15px] leading-[1.6] text-paper-dim">
+                        {app.gotcha}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
           </div>
         </div>
 
@@ -86,6 +128,7 @@ export default function DetailBoot({ slug, initialApp }: { slug: string; initial
                 Open the app
               </LinkButton>
               <UpvoteButton slug={app.slug} initial={app.upvotes} />
+              <ShareDialog app={app} variant="compact" />
             </div>
 
             <div className="rounded-2xl border border-paper/15 bg-ink-soft p-6">
@@ -211,6 +254,20 @@ function Avatar({ name }: { name: string }) {
       {initials}
     </div>
   );
+}
+
+function formatHours(h: number): string {
+  if (h < 1) return `${Math.round(h * 60)}m`;
+  if (h === Math.floor(h)) return `${h}h`;
+  return `${h.toFixed(1)}h`;
+}
+
+function hoursLabel(h: number): string {
+  if (h <= 1) return "snack-sized";
+  if (h <= 4) return "afternoon build";
+  if (h <= 12) return "long sitting";
+  if (h <= 40) return "weekend project";
+  return "ongoing labour";
 }
 
 function prettyUrl(url: string): string {

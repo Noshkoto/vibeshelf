@@ -18,6 +18,9 @@ interface DbApp {
   motif: string;
   cover_url: string | null;
   llms: string[] | null;
+  hours_to_ship: number | string | null;
+  key_prompt: string | null;
+  gotcha: string | null;
   owner_id: string;
   created_at: string;
 }
@@ -38,6 +41,9 @@ function fromDb(row: DbApp, upvoteCount = 0): AppEntry {
     motif: row.motif as AppEntry["motif"],
     customCoverDataUrl: row.cover_url ?? undefined,
     llms: (row.llms ?? []) as LlmId[],
+    hoursToShip: row.hours_to_ship == null ? undefined : Number(row.hours_to_ship),
+    keyPrompt: row.key_prompt ?? undefined,
+    gotcha: row.gotcha ?? undefined,
     createdAt: row.created_at,
   };
 }
@@ -81,16 +87,23 @@ export async function saveUserApp(entry: AppEntry): Promise<AppEntry | null> {
     motif: entry.motif,
     cover_url: entry.customCoverDataUrl ?? null,
     llms: entry.llms ?? [],
+    hours_to_ship: entry.hoursToShip ?? null,
+    key_prompt: entry.keyPrompt ?? null,
+    gotcha: entry.gotcha ?? null,
     owner_id: ownerId,
   };
 
   let { data, error } = await supa.from("apps").insert(payload).select().single();
 
-  // Migration 002_add_llms.sql may not have run on this Supabase project yet —
-  // fall back to inserting without the llms column so submissions still work.
-  if (error?.code === "42703" && /llms/i.test(error.message)) {
-    const { llms: _drop, ...legacy } = payload;
-    void _drop;
+  // Migrations may not have run on every Supabase project yet — strip unknown
+  // columns and retry so submissions still work against older schemas.
+  if (error?.code === "42703") {
+    const msg = error.message ?? "";
+    const legacy: Record<string, unknown> = { ...payload };
+    if (/llms/i.test(msg)) delete legacy.llms;
+    if (/hours_to_ship/i.test(msg)) delete legacy.hours_to_ship;
+    if (/key_prompt/i.test(msg)) delete legacy.key_prompt;
+    if (/gotcha/i.test(msg)) delete legacy.gotcha;
     ({ data, error } = await supa.from("apps").insert(legacy).select().single());
   }
 

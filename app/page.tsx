@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { LinkButton, ArrowGlyph } from "@/components/Button";
 import Gallery from "@/components/Gallery";
+import Pulse from "@/components/Pulse";
 import Ticker from "@/components/Ticker";
 import {
   allIssues,
@@ -64,6 +65,10 @@ export default function HomePage() {
           </div>
         </aside>
       </section>
+
+      <Suspense fallback={null}>
+        <Pulse />
+      </Suspense>
 
       <Ticker />
 

@@ -9,6 +9,7 @@ import type { AppEntry, CategoryId, CoverPalette, LlmId, ToolId } from "@/lib/ty
 import AppCard from "./AppCard";
 import { ArrowGlyph, Button, LinkButton } from "./Button";
 import CoverArt from "./CoverArt";
+import ShareDialog from "./ShareDialog";
 
 const PALETTES: CoverPalette[] = [
   "citrus", "dusk", "menthol", "ember", "concrete", "bloom",
@@ -32,6 +33,9 @@ interface Draft {
   motif: AppEntry["motif"];
   coverFile?: File;
   coverPreviewUrl?: string;
+  hoursToShip: string;
+  keyPrompt: string;
+  gotcha: string;
 }
 
 const BLANK: Draft = {
@@ -46,6 +50,9 @@ const BLANK: Draft = {
   category: "creative",
   palette: "citrus",
   motif: "grid",
+  hoursToShip: "",
+  keyPrompt: "",
+  gotcha: "",
 };
 
 const STEPS: { n: Step; label: string; hint: string }[] = [
@@ -80,8 +87,9 @@ export default function Submit() {
     return true;
   }, [step, draft]);
 
-  const preview: AppEntry = useMemo(
-    () => ({
+  const preview: AppEntry = useMemo(() => {
+    const hours = parseFloat(draft.hoursToShip);
+    return {
       slug: slugify(draft.title || "untitled"),
       title: draft.title || "Untitled",
       tagline: draft.tagline || "A short, intriguing description of what it does.",
@@ -96,10 +104,12 @@ export default function Submit() {
       palette: draft.palette,
       motif: draft.motif,
       customCoverDataUrl: draft.coverPreviewUrl,
+      hoursToShip: Number.isFinite(hours) && hours > 0 ? hours : undefined,
+      keyPrompt: draft.keyPrompt.trim() || undefined,
+      gotcha: draft.gotcha.trim() || undefined,
       createdAt: new Date().toISOString(),
-    }),
-    [draft]
-  );
+    };
+  }, [draft]);
 
   async function publish() {
     if (publishing) return;
@@ -130,16 +140,24 @@ export default function Submit() {
   }
 
   if (published) {
+    const publishedEntry: AppEntry = { ...preview, slug: published };
     return (
-      <div className="container-page py-24 text-center">
-        <div className="eyebrow mb-4">Published</div>
-        <h1 className="display mb-3 text-[clamp(56px,8vw,104px)] text-balance">
-          On the shelf.
-        </h1>
-        <p className="mx-auto mb-10 max-w-[42ch] text-pretty text-[17px] text-paper-dim">
-          Your app has been added to the gallery. Share the link, or put another one up.
-        </p>
-        <div className="flex flex-wrap justify-center gap-3">
+      <div className="container-page py-20">
+        <div className="mx-auto max-w-[640px] text-center">
+          <div className="eyebrow mb-4">Published</div>
+          <h1 className="display mb-3 text-[clamp(56px,8vw,104px)] text-balance">
+            On the shelf.
+          </h1>
+          <p className="mx-auto mb-8 max-w-[42ch] text-pretty text-[17px] text-paper-dim">
+            Tell the world. The link unfurls into a card with your cover, tagline, and tools.
+          </p>
+        </div>
+
+        <div className="mx-auto mt-8 max-w-[640px]">
+          <ShareDialog app={publishedEntry} variant="panel" />
+        </div>
+
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
           <LinkButton href={`/app/${published}`} variant="accent" size="lg" trailing={<ArrowGlyph />}>
             See it live
           </LinkButton>
@@ -557,6 +575,50 @@ function StackStep({ draft, update }: { draft: Draft; update: <K extends keyof D
           </p>
         )}
       </div>
+
+      <div className="rule-paper-dashed opacity-40" />
+
+      <div className="space-y-5">
+        <div>
+          <div className="eyebrow mb-1">Build notes · optional</div>
+          <p className="text-[13px] text-paper-dim">
+            Two minutes that turn a gallery entry into something other vibe coders learn from.
+          </p>
+        </div>
+
+        <Field label="Hours to ship" hint="rough is fine">
+          <input
+            className={inputCls}
+            type="number"
+            inputMode="decimal"
+            min={0}
+            step={0.5}
+            placeholder="4"
+            value={draft.hoursToShip}
+            onChange={(e) => update("hoursToShip", e.target.value)}
+          />
+        </Field>
+
+        <Field label="The prompt that cracked it" hint="optional">
+          <textarea
+            className={`${inputCls} min-h-[88px] resize-none`}
+            maxLength={500}
+            placeholder='"build me a flashcards app that punishes me with a small fire animation when I miss"'
+            value={draft.keyPrompt}
+            onChange={(e) => update("keyPrompt", e.target.value)}
+          />
+        </Field>
+
+        <Field label="One thing that didn't work" hint="optional">
+          <textarea
+            className={`${inputCls} min-h-[88px] resize-none`}
+            maxLength={400}
+            placeholder="Spent 90 min trying to get drag-and-drop right before giving up and using a list."
+            value={draft.gotcha}
+            onChange={(e) => update("gotcha", e.target.value)}
+          />
+        </Field>
+      </div>
     </div>
   );
 }
@@ -619,6 +681,9 @@ function ReviewStep({ draft }: { draft: Draft }) {
             v={draft.llms.length ? draft.llms.map((l) => LLMS.find((x) => x.id === l)?.label).join(" · ") : "—"}
           />
           <ReviewRow k="Maker" v={`${draft.makerName || "—"}${draft.makerHandle ? ` · ${draft.makerHandle}` : ""}`} />
+          {draft.hoursToShip && <ReviewRow k="Hours to ship" v={draft.hoursToShip} />}
+          {draft.keyPrompt && <ReviewRow k="Key prompt" v={draft.keyPrompt} />}
+          {draft.gotcha && <ReviewRow k="Gotcha" v={draft.gotcha} />}
         </dl>
       </div>
     </div>

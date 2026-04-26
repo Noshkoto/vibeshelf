@@ -9,6 +9,8 @@ export default function Nav() {
   const pathname = usePathname();
   const onHome = pathname === "/";
 
+  if (pathname?.startsWith("/embed/")) return null;
+
   return (
     <header className="relative z-10">
       <div className="container-page flex items-center justify-between gap-4 py-6">
