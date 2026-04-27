@@ -53,7 +53,7 @@ export default function HomePage() {
             <div className="eyebrow mb-4">What gets in</div>
             <ul className="space-y-3 text-[14px] text-paper-dim">
               <Bullet>Anything you shipped — live URL required.</Bullet>
-              <Bullet>Built mostly with AI tools. Cursor, Lovable, v0, Bolt, Claude Code, et al.</Bullet>
+              <Bullet>Built mostly with AI tools. Cursor, Lovable, v0, Bolt, Claude Code, Codex, Hermes, OpenClaw, et al.</Bullet>
               <Bullet>Weird, small, useful, useless. All welcome.</Bullet>
               <Bullet>One screenshot or a short video clip is enough.</Bullet>
             </ul>

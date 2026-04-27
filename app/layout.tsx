@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     template: "%s · Vibeshelf",
   },
   description:
-    "A gallery of applications built by vibe coders. Bring your Cursor, Lovable, v0, Bolt, and Claude Code apps to the shelf.",
+    "A gallery of applications built by vibe coders. Bring your Cursor, Lovable, v0, Bolt, Claude Code, Codex, Hermes, and OpenClaw apps to the shelf.",
   openGraph: {
     title: "Vibeshelf — a showcase for vibe-coded apps",
     description:
